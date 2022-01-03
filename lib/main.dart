@@ -122,9 +122,10 @@ class MyApp extends StatelessWidget {
                                   _station = Station(
                                     name: snap.data?.docs[index].get('name'),
                                     url: snap.data?.docs[index].get('url'),
-                                      logo: snap.data?.docs[index].get('icon')
+                                    logo: snap.data?.docs[index].get('icon')
                                   );
                                   _radioPlayer.stationChange(_station);
+                                  var blob =
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.all(5),

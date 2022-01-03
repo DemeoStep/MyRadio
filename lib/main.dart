@@ -3,8 +3,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:radio_player/radio_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'controller/player.dart';
 import 'model/station.dart';
-import 'model/stations_list.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,13 +12,11 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final RadioPlayer _radioPlayer = RadioPlayer();
+  final Player _radioPlayer = Player(false, [], Station.newStation());
   bool _isPlaying = false;
   List<String>? _metadata;
 
-  StationsList list = StationsList.newList();
   Station _station;
-  int _stationIndex = 0;
 
   BehaviorSubject<bool> onIsPlayingChange;
   BehaviorSubject<List<String>?> onMetaChange;
@@ -40,52 +38,16 @@ class MyApp extends StatelessWidget {
     _metadata = meta;
   }
 
-  Future stationChange(int index) async {
-    if (index < 0) index = list.count - 1;
-    if (index > list.count - 1) index = 0;
-
-    _station = await list.getStation(index);
-    _stationIndex = _station.index;
-    onStationChange.add(_station);
-    initRadioPlayer();
-  }
-
-  void initRadioPlayer() async {
-    _radioPlayer.setMediaItem(_station.name, _station.url, _station.logo);
-
-    _radioPlayer.stateStream.listen((value) {
-      isPlayingChange(value);
-    });
-
-    _radioPlayer.metadataStream.listen((value) {
-      metaChange(value);
-    });
-  }
-
   Future<void> initFirebase() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
   }
 
-  Future<void> loadList() async {
-    list.loadList().then((result) async {
-      await stationChange(_stationIndex);
-      initRadioPlayer();
-      metaChange(['', '', '']);
-    });
-  }
-
-  void _controls(int index) {
-    index == 1 && _isPlaying ? _radioPlayer.pause() : _radioPlayer.play();
-    if (index == 2) stationChange(_stationIndex + 1);
-    if (index == 0) stationChange(_stationIndex - 1);
-  }
-
   @override
   Widget build(BuildContext context) {
-    loadList();
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.black,
         bottomNavigationBar: BottomNavigationBar(
@@ -124,16 +86,16 @@ class MyApp extends StatelessWidget {
           ],
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.white,
-          onTap: _controls,
+          onTap: (value) {},
         ),
         appBar: AppBar(
             backgroundColor: Colors.blueGrey.shade900,
             centerTitle: true,
             title: StreamBuilder<Station>(
-              stream: onStationChange,
+              stream: _radioPlayer.onStationChange,
               builder: (context, snapshot) {
                 var station =
-                    snapshot.data ?? Station(index: 0, name: '', url: '');
+                    snapshot.data ?? Station(name: '', url: '');
                 return Text(station.name);
               },
             )),
@@ -155,11 +117,21 @@ class MyApp extends StatelessWidget {
                             ),
                             itemCount: snap.data?.docs.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                margin: const EdgeInsets.all(5),
-                                color: Colors.amber,
-                                child: Image.network(
-                                    snap.data?.docs[index].get('icon')),
+                              return OutlinedButton(
+                                onPressed: () {
+                                  _station = Station(
+                                    name: snap.data?.docs[index].get('name'),
+                                    url: snap.data?.docs[index].get('url'),
+                                      logo: snap.data?.docs[index].get('icon')
+                                  );
+                                  _radioPlayer.stationChange(_station);
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.all(5),
+                                  color: Colors.amber,
+                                  child: Image.network(
+                                      snap.data?.docs[index].get('icon')),
+                                ),
                               );
                             },
                         );

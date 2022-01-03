@@ -1,10 +1,7 @@
 class Station {
   String _name = '';
   String _url = '';
-  String _logo = 'lib/assets/cover.jpg';
-  int _index = 0;
-
-  int get index => _index;
+  String _logo = '';
 
   String get name => _name;
   void setName(String name) {
@@ -20,15 +17,13 @@ class Station {
   void setLogo(String filename) {}
 
   Station(
-      {required int index,
-        required String name,
+      {required String name,
         required String url,
         String logo = ''}) {
-    _index = index;
     _name = name;
     _url = url;
-    logo != '' ? _logo = logo : _logo = 'lib/assets/cover.jpg';
+    logo != '' ? _logo = logo : _logo = '';
   }
 
-  Station.newStation() : this(index: 0, name: '', url: '');
+  Station.newStation() : this(name: '', url: '');
 }

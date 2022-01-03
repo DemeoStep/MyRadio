@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:my_radio/model/station.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:radio_player/radio_player.dart';
+import 'package:http/http.dart' as http;
 
 class Player{
   final RadioPlayer _player = RadioPlayer();
@@ -33,6 +36,8 @@ class Player{
     this.station = station;
     initRadioPlayer();
     _player.play();
+    var response = await http.get(Uri.parse(station.logo));
+    log(response.bodyBytes.toString());
   }
 
   void initRadioPlayer() async {

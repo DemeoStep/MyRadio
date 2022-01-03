@@ -1,6 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:my_radio/view/genre.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:radio_player/radio_player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'controller/player.dart';
@@ -8,35 +10,14 @@ import 'model/station.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(false, null, Station.newStation()));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   final Player _radioPlayer = Player(false, [], Station.newStation());
-  bool _isPlaying = false;
-  List<String>? _metadata;
 
-  Station _station;
-
-  BehaviorSubject<bool> onIsPlayingChange;
-  BehaviorSubject<List<String>?> onMetaChange;
-  BehaviorSubject<Station> onStationChange;
-
-  MyApp(this._isPlaying, this._metadata, this._station, {Key? key})
-      : onIsPlayingChange = BehaviorSubject<bool>.seeded(_isPlaying),
-        onMetaChange = BehaviorSubject<List<String>?>.seeded(_metadata),
-        onStationChange = BehaviorSubject<Station>.seeded(_station),
-        super(key: key);
-
-  Future isPlayingChange(bool isPlaying) async {
-    onIsPlayingChange.add(isPlaying);
-    _isPlaying = isPlaying;
-  }
-
-  Future metaChange(List<String>? meta) async {
-    onMetaChange.add(meta);
-    _metadata = meta;
-  }
+  MyApp({Key? key})
+      : super(key: key);
 
   Future<void> initFirebase() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +45,7 @@ class MyApp extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: StreamBuilder<bool>(
-                  stream: onIsPlayingChange,
+                  stream: _radioPlayer.onIsPlayingChange,
                   builder: (context, snapshot) {
                     var isPlaying = snapshot.data ?? false;
                     return Icon(
@@ -91,11 +72,18 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
             backgroundColor: Colors.blueGrey.shade900,
             centerTitle: true,
+            leading: StreamBuilder<Station>(
+              stream: _radioPlayer.onStationChange,
+              builder: (context, snapshot) {
+                return Image.memory(snapshot.data!.img);
+              },
+            ),
             title: StreamBuilder<Station>(
               stream: _radioPlayer.onStationChange,
               builder: (context, snapshot) {
                 var station =
-                    snapshot.data ?? Station(name: '', url: '');
+                    snapshot.data ?? Station(name: '', url: '', logo: '', 
+                        img: Uint8List.fromList([]));
                 return Text(station.name);
               },
             )),
@@ -104,41 +92,7 @@ class MyApp extends StatelessWidget {
             future: initFirebase(),
             builder: (context, futureSnapshot) {
               if (futureSnapshot.connectionState == ConnectionState.done) {
-                return StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection('rock')
-                        .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snap) {
-                      if(snap.hasData) {
-                        return GridView.builder(
-                            gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                            ),
-                            itemCount: snap.data?.docs.length,
-                            itemBuilder: (context, index) {
-                              return OutlinedButton(
-                                onPressed: () {
-                                  _station = Station(
-                                    name: snap.data?.docs[index].get('name'),
-                                    url: snap.data?.docs[index].get('url'),
-                                    logo: snap.data?.docs[index].get('icon')
-                                  );
-                                  _radioPlayer.stationChange(_station);
-                                  var blob =
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.all(5),
-                                  color: Colors.amber,
-                                  child: Image.network(
-                                      snap.data?.docs[index].get('icon')),
-                                ),
-                              );
-                            },
-                        );
-                      }
-                      return const CircularProgressIndicator();
-                    });
+                return Genre(radioPlayer: _radioPlayer, genre: 'pop',);
               }
               return const CircularProgressIndicator();
             },

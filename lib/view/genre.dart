@@ -21,13 +21,13 @@ class Genre extends StatelessWidget {
         builder: (context, AsyncSnapshot<QuerySnapshot> snap) {
           if(snap.hasData) {
             return GridView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
               gridDelegate:
               const SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 1,
+                childAspectRatio: 0.8,
                 crossAxisCount: 2,
                 mainAxisSpacing: 20,
-                crossAxisSpacing: 0,
+                crossAxisSpacing: 20
               ),
               itemCount: snap.data?.docs.length,
               itemBuilder: (context, index) {
@@ -38,40 +38,46 @@ class Genre extends StatelessWidget {
                     img: snap.data?.docs[index].get('logo')
                     //img: Uint8List.fromList([])
                 );
-                return OutlinedButton(
-                  onPressed: () {
-                    radioPlayer.stationChange(station);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
+                return Container(
+                    clipBehavior: Clip.antiAlias,
                     decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red,
-                          offset: Offset(2,2),
-                          blurRadius: 5,
-                        ),
-                        BoxShadow(
-                          color: Colors.yellow,
-                          offset: Offset(-2,-2),
-                            blurRadius: 5,
-                        )
-                      ]
-                    ),
-                    child: Column(
-                      children: [
-                        Image.network(station.logo),
-                        Text(station.name,
-                          maxLines: 2,
-                          style: const TextStyle(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        boxShadow: [
+                          BoxShadow(
                             color: Colors.red,
+                            offset: Offset(2,2),
+                            blurRadius: 5,
                           ),
-                        ),
-                      ],
+                          BoxShadow(
+                            color: Colors.yellow,
+                            offset: Offset(-2,-2),
+                            blurRadius: 5,
+                          )
+                        ]
                     ),
-                  ),
+                    child: OutlinedButton(
+                      clipBehavior: Clip.antiAlias,
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      onPressed: () {
+                        radioPlayer.stationChange(station);
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.network(station.logo),
+                          Text(station.name,
+                            maxLines: 2,
+                            style: const TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 );
               },
             );

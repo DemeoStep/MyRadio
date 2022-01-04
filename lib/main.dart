@@ -27,78 +27,83 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.black,
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.blueGrey.shade900,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          items: [
-            const BottomNavigationBarItem(
-              icon: Icon(
-                Icons.skip_previous,
-                size: 50,
-              ),
-              label: "",
+    return FutureBuilder(
+      future: initFirebase(),
+      builder: (BuildContext context, futureSnapshot) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            backgroundColor: Colors.black,
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Colors.blueGrey.shade900,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              items: [
+                const BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.skip_previous,
+                    size: 50,
+                  ),
+                  label: "",
+                ),
+                BottomNavigationBarItem(
+                  icon: StreamBuilder<bool>(
+                      stream: _radioPlayer.onIsPlayingChange,
+                      builder: (context, snapshot) {
+                        var isPlaying = snapshot.data ?? false;
+                        return Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 50,
+                        );
+                      }),
+                  label: "",
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.skip_next,
+                    size: 50,
+                  ),
+                  label: "",
+                ),
+              ],
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white,
+              onTap: (value) {},
             ),
-            BottomNavigationBarItem(
-              icon: StreamBuilder<bool>(
-                  stream: _radioPlayer.onIsPlayingChange,
+            appBar: AppBar(
+                backgroundColor: Colors.blueGrey.shade900,
+                centerTitle: true,
+                leading: StreamBuilder<Station>(
+                  stream: _radioPlayer.onStationChange,
                   builder: (context, snapshot) {
-                    var isPlaying = snapshot.data ?? false;
-                    return Icon(
-                      isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      size: 50,
-                    );
-                  }),
-              label: "",
-            ),
-            const BottomNavigationBarItem(
-              icon: Icon(
-                Icons.skip_next,
-                size: 50,
+                    return Image.memory(snapshot.data!.img);
+                  },
+                ),
+                title: StreamBuilder<Station>(
+                  stream: _radioPlayer.onStationChange,
+                  builder: (context, snapshot) {
+                    var station =
+                        snapshot.data ?? Station(name: '', url: '', logo: '',
+                            img: '');
+                    return Text(station.name);
+                  },
+                )),
+            body: Center(
+              child: FutureBuilder(
+                future: initFirebase(),
+                builder: (context, futureSnapshot) {
+                  if (futureSnapshot.connectionState == ConnectionState.done) {
+                    return Genre(radioPlayer: _radioPlayer, genre: 'rock',);
+                  }
+                  return const CircularProgressIndicator();
+                },
               ),
-              label: "",
             ),
-          ],
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white,
-          onTap: (value) {},
-        ),
-        appBar: AppBar(
-            backgroundColor: Colors.blueGrey.shade900,
-            centerTitle: true,
-            leading: StreamBuilder<Station>(
-              stream: _radioPlayer.onStationChange,
-              builder: (context, snapshot) {
-                return Image.memory(snapshot.data!.img);
-              },
-            ),
-            title: StreamBuilder<Station>(
-              stream: _radioPlayer.onStationChange,
-              builder: (context, snapshot) {
-                var station =
-                    snapshot.data ?? Station(name: '', url: '', logo: '', 
-                        img: Uint8List.fromList([]));
-                return Text(station.name);
-              },
-            )),
-        body: Center(
-          child: FutureBuilder(
-            future: initFirebase(),
-            builder: (context, futureSnapshot) {
-              if (futureSnapshot.connectionState == ConnectionState.done) {
-                return Genre(radioPlayer: _radioPlayer, genre: 'pop',);
-              }
-              return const CircularProgressIndicator();
-            },
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

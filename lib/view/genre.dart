@@ -21,9 +21,13 @@ class Genre extends StatelessWidget {
         builder: (context, AsyncSnapshot<QuerySnapshot> snap) {
           if(snap.hasData) {
             return GridView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
               gridDelegate:
               const SliverGridDelegateWithFixedCrossAxisCount(
+                childAspectRatio: 1,
                 crossAxisCount: 2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 0,
               ),
               itemCount: snap.data?.docs.length,
               itemBuilder: (context, index) {
@@ -31,19 +35,42 @@ class Genre extends StatelessWidget {
                     name: snap.data?.docs[index].get('name'),
                     url: snap.data?.docs[index].get('url'),
                     logo: snap.data?.docs[index].get('icon'),
-                    // img: snap.data?.docs[index].get('logo')
-                    img: Uint8List.fromList([])
+                    img: snap.data?.docs[index].get('logo')
+                    //img: Uint8List.fromList([])
                 );
                 return OutlinedButton(
                   onPressed: () {
                     radioPlayer.stationChange(station);
                   },
                   child: Container(
-                    margin: const EdgeInsets.all(5),
-                    color: Colors.amber,
-                    // child: Image.memory(
-                    //     station.img),
-                    child: Image.network(station.logo),
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red,
+                          offset: Offset(2,2),
+                          blurRadius: 5,
+                        ),
+                        BoxShadow(
+                          color: Colors.yellow,
+                          offset: Offset(-2,-2),
+                            blurRadius: 5,
+                        )
+                      ]
+                    ),
+                    child: Column(
+                      children: [
+                        Image.network(station.logo),
+                        Text(station.name,
+                          maxLines: 2,
+                          style: const TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -32,8 +32,8 @@ class Player{
   }
 
   Future stationChange(Station station) async {
-    onStationChange.add(station);
     this.station = station;
+    onStationChange.add(station);
     initRadioPlayer();
     _player.play();
     var response = await http.get(Uri.parse(station.logo));

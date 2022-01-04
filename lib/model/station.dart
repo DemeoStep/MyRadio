@@ -38,8 +38,8 @@ class Station {
     _name = name;
     _url = url;
     logo != '' ? _logo = logo : _logo = '';
-    //setImg(img);
+    setImg(img);
   }
 
-  Station.newStation() : this(name: '', url: '', logo: '', img: Uint8List.fromList([]));
+  Station.newStation() : this(name: '', url: '', logo: '', img: '');
 }

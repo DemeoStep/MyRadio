@@ -68,7 +68,7 @@ class Genre extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.network(station.logo),
+                          Image.memory(station.img),
                           Text(station.name,
                             maxLines: 2,
                             style: const TextStyle(

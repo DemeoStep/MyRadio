@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:my_radio/controller/player.dart';
@@ -38,46 +36,73 @@ class Genre extends StatelessWidget {
                     img: snap.data?.docs[index].get('logo')
                     //img: Uint8List.fromList([])
                 );
-                return Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration: const BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red,
-                            offset: Offset(2,2),
-                            blurRadius: 5,
+                station.index = index;
+                return StreamBuilder<Station>(
+                  stream: radioPlayer.onStationChange,
+                  builder: (context, snapshot) {
+                    return Container(
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: index == snapshot.data?.index ? [
+                              const BoxShadow(
+                                color: Colors.red,
+                                offset: Offset(2,2),
+                                blurRadius: 7,
+                              ),
+                              const BoxShadow(
+                                color: Colors.red,
+                                offset: Offset(-2,-2),
+                                blurRadius: 7,
+                              )
+                            ] : []
+                        ),
+                        child: OutlinedButton(
+                          clipBehavior: Clip.antiAlias,
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.zero,
                           ),
-                          BoxShadow(
-                            color: Colors.yellow,
-                            offset: Offset(-2,-2),
-                            blurRadius: 5,
-                          )
-                        ]
-                    ),
-                    child: OutlinedButton(
-                      clipBehavior: Clip.antiAlias,
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                      ),
-                      onPressed: () {
-                        radioPlayer.stationChange(station);
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Image.memory(station.img),
-                          Text(station.name,
-                            maxLines: 2,
-                            style: const TextStyle(
-                              color: Colors.red,
-                            ),
+                          onPressed: () {
+                            radioPlayer.stationChange(station);
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 8, left: 8,
+                                    right: 8),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)),
+                                ),
+                                  child: Image.memory(station.img),
+                              ),
+                              Expanded(
+                                child: Container(),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                alignment: Alignment.center,
+                                child: Text(station.name,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 16
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                    );
+                  }
                 );
               },
             );

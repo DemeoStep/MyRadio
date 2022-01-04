@@ -5,6 +5,7 @@ class Station {
   String _url = '';
   String _logo = '';
   Uint8List _img = Uint8List.fromList([]);
+  int index = 0;
 
   String get name => _name;
   void setName(String name) {
